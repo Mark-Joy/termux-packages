@@ -14,6 +14,8 @@ termux_step_setup_variables() {
 	: "${TERMUX_SKIP_DEPCHECK:="false"}"
 	: "${TERMUX_TOPDIR:="$HOME/.termux-build"}"
 	: "${TERMUX_PACMAN_PACKAGE_COMPRESSION:="xz"}"
+	: "${TERMUX_PKG_CUSTOM_MAKE:="true"}"
+	: "${TERMUX_PKG_CUSTOM_INSTALL:="true"}"
 
 	if [ "$TERMUX_ON_DEVICE_BUILD" = "true" ]; then
 		# For on-device builds cross-compiling is not supported so we can
