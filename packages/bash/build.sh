@@ -5,7 +5,10 @@ TERMUX_PKG_MAINTAINER="@termux"
 _MAIN_VERSION=5.1
 _PATCH_VERSION=16
 TERMUX_PKG_VERSION=${_MAIN_VERSION}.${_PATCH_VERSION}
-TERMUX_PKG_SRCURL=https://mirrors.kernel.org/gnu/bash/bash-${_MAIN_VERSION}.tar.gz
+#TERMUX_PKG_REVISION=2
+TERMUX_PKG_GIT_BRANCH=master
+#TERMUX_PKG_SRCURL=https://mirrors.kernel.org/gnu/bash/bash-${_MAIN_VERSION}.tar.gz
+TERMUX_PKG_SRCURL=https://github.com/Mark-Joy/bash.git
 TERMUX_PKG_SHA256=cc012bc860406dcf42f64431bcd3d2fa7560c02915a601aba9cd597a39329baa
 TERMUX_PKG_DEPENDS="libandroid-support, libiconv, ncurses, readline (>= 8.0), termux-tools"
 TERMUX_PKG_RECOMMENDS="command-not-found"
@@ -64,6 +67,12 @@ termux_step_pre_configure() {
 		patch -p0 -i $PATCHFILE
 	done
 	unset PATCH_CHECKSUMS PATCHFILE PATCH_NUM
+}
+
+# Clone the lastest source code directly from github
+# No longer need revision patch: Disable the below func
+termux_step_pre_configure() {
+	: 
 }
 
 termux_step_post_make_install() {
