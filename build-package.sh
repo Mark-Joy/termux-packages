@@ -403,6 +403,9 @@ _show_usage() {
 	echo "  -I Download and extract dependencies instead of building them, keep existing $TERMUX_BASE_DIR files."
 	echo "  -L The package and its dependencies will be based on the same library."
 	echo "  -q Quiet build."
+	echo "  -c Continue previous build, skip source extraction and configure step and go straight to termux_step_make. Only works if you first run a normal build, and it fails or you stop it during termux_step_make or later."
+	echo "  -g Configure only, no Make or Install"
+	echo "  -m (Configure and) Make only, no Install"
 	echo "  -w Install dependencies without version binding."
 	echo "  -s Skip dependency check."
 	echo "  -o Specify directory where to put built packages. Default: output/."
@@ -492,6 +495,8 @@ while (($# >= 1)); do
 			fi
 			;;
 		-c) TERMUX_CONTINUE_BUILD=true;;
+		-g) export TERMUX_PKG_CUSTOM_CFG_ONLY=true;;
+		-m) export TERMUX_PKG_CUSTOM_MAKE_ONLY=true;;
 		-*) termux_error_exit "./build-package.sh: illegal option '$1'";;
 		*) PACKAGE_LIST+=("$1");;
 	esac
@@ -639,30 +644,38 @@ for ((i=0; i<${#PACKAGE_LIST[@]}; i++)); do
 			cd "$TERMUX_PKG_BUILDDIR"
 			termux_step_post_configure
 		fi
-		cd "$TERMUX_PKG_BUILDDIR"
-		termux_step_make
-		cd "$TERMUX_PKG_BUILDDIR"
-		termux_step_make_install
-		cd "$TERMUX_PKG_BUILDDIR"
-		termux_step_post_make_install
-		termux_step_install_service_scripts
-		termux_step_install_license
-		cd "$TERMUX_PKG_MASSAGEDIR"
-		termux_step_extract_into_massagedir
-		termux_step_massage
-		cd "$TERMUX_PKG_MASSAGEDIR/$TERMUX_PREFIX_CLASSICAL"
-		termux_step_post_massage
-		cd "$TERMUX_PKG_MASSAGEDIR"
-		if [ "$TERMUX_PACKAGE_FORMAT" = "debian" ]; then
-			termux_step_create_debian_package
-		elif [ "$TERMUX_PACKAGE_FORMAT" = "pacman" ]; then
-			termux_step_create_pacman_package
-		else
-			termux_error_exit "Unknown packaging format '$TERMUX_PACKAGE_FORMAT'."
+
+		if [ "$TERMUX_PKG_CUSTOM_CFG_ONLY" == "false" ]; then
+			cd "$TERMUX_PKG_BUILDDIR"
+			termux_step_make
 		fi
-		# Saving a list of compiled packages for further work with it
-		termux_add_package_to_built_packages_list "$TERMUX_PKG_NAME"
-		termux_step_finish_build
+
+		if [[ "$TERMUX_PKG_CUSTOM_CFG_ONLY" == "false" && "$TERMUX_PKG_CUSTOM_MAKE_ONLY" == "false" ]]; then
+			cd "$TERMUX_PKG_BUILDDIR"
+			termux_step_make
+			cd "$TERMUX_PKG_BUILDDIR"
+			termux_step_make_install
+			cd "$TERMUX_PKG_BUILDDIR"
+			termux_step_post_make_install
+			termux_step_install_service_scripts
+			termux_step_install_license
+			cd "$TERMUX_PKG_MASSAGEDIR"
+			termux_step_extract_into_massagedir
+			termux_step_massage
+			cd "$TERMUX_PKG_MASSAGEDIR/$TERMUX_PREFIX_CLASSICAL"
+			termux_step_post_massage
+			cd "$TERMUX_PKG_MASSAGEDIR"
+			if [ "$TERMUX_PACKAGE_FORMAT" = "debian" ]; then
+				termux_step_create_debian_package
+			elif [ "$TERMUX_PACKAGE_FORMAT" = "pacman" ]; then
+				termux_step_create_pacman_package
+			else
+				termux_error_exit "Unknown packaging format '$TERMUX_PACKAGE_FORMAT'."
+			fi
+			# Saving a list of compiled packages for further work with it
+			termux_add_package_to_built_packages_list "$TERMUX_PKG_NAME"
+			termux_step_finish_build
+		fi
 	) 5< "$TERMUX_BUILD_LOCK_FILE"
 done
 

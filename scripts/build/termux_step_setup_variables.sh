@@ -15,6 +15,8 @@ termux_step_setup_variables() {
 	: "${TERMUX_GLOBAL_LIBRARY:="false"}"
 	: "${TERMUX_TOPDIR:="$HOME/.termux-build"}"
 	: "${TERMUX_PACMAN_PACKAGE_COMPRESSION:="xz"}"
+	: "${TERMUX_PKG_CUSTOM_CFG_ONLY:="false"}"
+	: "${TERMUX_PKG_CUSTOM_MAKE_ONLY:="false"}"
 
 	if [ -z "${TERMUX_PACKAGE_FORMAT-}" ]; then
 		if [ "$TERMUX_ON_DEVICE_BUILD" = "true" ] && [ -n "${TERMUX_APP_PACKAGE_MANAGER-}" ]; then
