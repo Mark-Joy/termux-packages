@@ -5,7 +5,9 @@ TERMUX_PKG_MAINTAINER="@termux"
 _MAIN_VERSION=5.2
 _PATCH_VERSION=15
 TERMUX_PKG_VERSION=${_MAIN_VERSION}.${_PATCH_VERSION}
-TERMUX_PKG_SRCURL=https://mirrors.kernel.org/gnu/bash/bash-${_MAIN_VERSION}.tar.gz
+#TERMUX_PKG_SRCURL=https://mirrors.kernel.org/gnu/bash/bash-${_MAIN_VERSION}.tar.gz
+TERMUX_PKG_GIT_BRANCH=master
+TERMUX_PKG_SRCURL=https://github.com/Mark-Joy/bash.git
 TERMUX_PKG_SHA256=a139c166df7ff4471c5e0733051642ee5556c1cc8a4a78f145583c5c81ab32fb
 TERMUX_PKG_DEPENDS="libandroid-support, libiconv, readline (>= 8.0), termux-tools"
 TERMUX_PKG_RECOMMENDS="command-not-found, bash-completion"
@@ -14,7 +16,8 @@ TERMUX_PKG_REPLACES="bash-dev"
 TERMUX_PKG_ESSENTIAL=true
 TERMUX_PKG_BUILD_IN_SRC=true
 
-TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--enable-multibyte --without-bash-malloc --with-installed-readline"
+#TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--enable-multibyte --without-bash-malloc --with-installed-readline"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--enable-multibyte --without-bash-malloc"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" bash_cv_job_control_missing=present"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" bash_cv_sys_siglist=yes"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" bash_cv_func_sigsetjmp=present"
@@ -62,6 +65,12 @@ termux_step_pre_configure() {
 		patch -p0 -i $PATCHFILE
 	done
 	unset PATCH_CHECKSUMS PATCHFILE PATCH_NUM
+}
+
+# Clone the lastest source code directly from github
+# No longer need patches version: Disable the below func
+termux_step_pre_configure() {
+	: 
 }
 
 termux_step_post_make_install() {
