@@ -6,8 +6,11 @@ _MAIN_VERSION=5.2
 _PATCH_VERSION=15
 TERMUX_PKG_VERSION=${_MAIN_VERSION}.${_PATCH_VERSION}
 TERMUX_PKG_REVISION=1
-TERMUX_PKG_SRCURL=https://mirrors.kernel.org/gnu/bash/bash-${_MAIN_VERSION}.tar.gz
-TERMUX_PKG_SHA256=a139c166df7ff4471c5e0733051642ee5556c1cc8a4a78f145583c5c81ab32fb
+TERMUX_PKG_SRCURL=git+https://github.com/Mark-Joy/bash
+TERMUX_PKG_GIT_BRANCH=master
+TERMUX_PKG_SHA256=SKIP_CHECKSUM
+#TERMUX_PKG_SRCURL=https://mirrors.kernel.org/gnu/bash/bash-${_MAIN_VERSION}.tar.gz
+#TERMUX_PKG_SHA256=a139c166df7ff4471c5e0733051642ee5556c1cc8a4a78f145583c5c81ab32fb
 TERMUX_PKG_AUTO_UPDATE=false
 TERMUX_PKG_DEPENDS="libandroid-support, libiconv, readline (>= 8.0), termux-tools"
 TERMUX_PKG_RECOMMENDS="command-not-found, bash-completion"
@@ -16,12 +19,29 @@ TERMUX_PKG_REPLACES="bash-dev"
 TERMUX_PKG_ESSENTIAL=true
 TERMUX_PKG_BUILD_IN_SRC=true
 
-TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--enable-multibyte --without-bash-malloc --with-installed-readline"
+#TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--enable-multibyte --without-bash-malloc --with-installed-readline"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--enable-multibyte --without-bash-malloc"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" bash_cv_job_control_missing=present"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" bash_cv_sys_siglist=yes"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" bash_cv_func_sigsetjmp=present"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" bash_cv_unusable_rtsigs=no"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" ac_cv_func_mbsnrtowcs=no"
+
+# ******************************************************************************
+# ******************************************************************************
+# https://www.gnu.org/software/bash/manual/html_node/Optional-Features.html
+# https://stackoverflow.com/questions/30800331/getrandom-syscall-in-c-not-found/45239836#45239836
+# https://github.com/briansmith/ring/issues/852
+# https://forums.raspberrypi.com/viewtopic.php?p=1778760&sid=11200a64c8eb8636471cd5983cb02419#p1778760
+# [$PREFIX/include/sys/random.h] says [getrandom] and [getentropy] supported on __ANDROID_API__ >= 28 (9-Pie)
+# But the above link says they are supported in [glibc]. And Android has [bionic] not [glibc]
+# github link says [bionic] also going to support [getrandom] and [getentropy] on coming API>=28
+# [configure] file was changed in bash [5.1 to 5.2] to support options: [ac_cv_func_getrandom] and [ac_cv_func_getentropy]
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" ac_cv_func_getrandom=no"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" ac_cv_func_getentropy=no"
+# ******************************************************************************
+# ******************************************************************************
+
 # Use bash_cv_dev_fd=whacky to use /proc/self/fd instead of /dev/fd.
 # After making this change process substitution such as in 'cat <(ls)' works.
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" bash_cv_dev_fd=whacky"
@@ -64,6 +84,12 @@ termux_step_pre_configure() {
 		patch -p0 -i $PATCHFILE
 	done
 	unset PATCH_CHECKSUMS PATCHFILE PATCH_NUM
+}
+
+# Clone the lastest source code directly from github
+# No longer need patches version: Disable the below func
+termux_step_pre_configure() {
+	: 
 }
 
 termux_step_post_make_install() {
